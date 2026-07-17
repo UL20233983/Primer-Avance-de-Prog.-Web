@@ -6,6 +6,7 @@ import LibroCard from './components/LibroCard';
 import LibroDetalle from './components/LibroDetalle';
 import Login from './components/Login';
 import Registro from './components/Registro';
+import VistaUsuarios from './components/VistaUsuarios';
 
 import { libros } from './data/libros';
 
@@ -85,6 +86,8 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/registro" element={<Registro />} />
+
+        <Route path="/admin" element={<VistaUsuarios />} />
 
         <Route path="/publicar" element={<PublicarLibro />} />
 

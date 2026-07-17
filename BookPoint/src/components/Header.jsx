@@ -100,6 +100,13 @@ function Header() {
 
         {usuarioActual ? (
           <>
+            {
+              usuarioActual.correo === "admin" && (
+                <Link to="/admin" className="nav-link">
+                  Ver usuarios
+                </Link>
+              )
+            }
             <span className="nav-link">
               Hola, {usuarioActual.nombre}
             </span>

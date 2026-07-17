@@ -470,3 +470,51 @@ body {
   display:block;
   box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
+
+
+.tabla-usuarios{
+
+  max-width:900px;
+  margin:40px auto;
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.tabla-usuarios h2{
+
+  margin-bottom:20px;
+  text-align:center;
+
+}
+
+.tabla-usuarios table{
+
+  width:100%;
+  border-collapse:collapse;
+
+}
+
+.tabla-usuarios th,
+.tabla-usuarios td{
+
+  border:1px solid #ddd;
+  padding:12px;
+  text-align:left;
+
+}
+
+.tabla-usuarios th{
+
+  background:#0056b3;
+  color:white;
+
+}
+
+.tabla-usuarios tr:nth-child(even){
+
+  background:#f5f5f5;
+
+}
