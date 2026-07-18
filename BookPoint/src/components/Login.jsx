@@ -1,64 +1,68 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
 
-  const [correo, setCorreo] = useState("");
-  const [password, setPassword] = useState("");
+    const [correo, setCorreo] = useState("");
+    const [password, setPassword] = useState("");
 
-  const { login } = useContext(AuthContext);
+    const { login } = useContext(AuthContext);
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  function iniciarSesion() {
+    async function iniciarSesion() {
 
-    const ingreso = login(correo, password);
+        const ingreso = await login(correo, password);
 
-    if (ingreso) {
+        if (ingreso) {
 
-      alert("Inicio de sesión exitoso");
+            alert("Inicio de sesión exitoso");
 
-      navigate('/');
+            navigate("/");
+
+        }
+
     }
-    else {
 
-      alert("Correo o contraseña incorrectos");
-    }
-  }
+    return (
 
-  return (
-    <div className="form-contenedor">
+        <div className="form-contenedor">
 
-      <h2>Iniciar Sesión</h2>
+            <h2>Iniciar Sesión</h2>
 
-      <input
-        type="text"
-        placeholder="Correo ULima o admin"
-        value={correo}
-        onChange={(e) => setCorreo(e.target.value)}
-      />
+            <input
+                type="text"
+                placeholder="Correo ULima o admin"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+            />
 
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+            <input
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
 
-      <button
-        className="boton-login"
-        onClick={iniciarSesion}
-      >
-        Ingresar
-      </button>
+            <button
+                className="boton-login"
+                onClick={iniciarSesion}
+            >
+                Ingresar
+            </button>
 
-      <p>
-        ¿No tienes cuenta? <Link to="/registro">Crear cuenta</Link>
-      </p>
+            <p>
+                ¿No tienes cuenta?{" "}
+                <Link to="/registro">
+                    Crear cuenta
+                </Link>
+            </p>
 
-    </div>
-  );
+        </div>
+
+    );
+
 }
 
 export default Login;

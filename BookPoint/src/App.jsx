@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import PublicarLibro from './components/PublicarLibro';
 import Header from './components/Header';
 import LibroCard from './components/LibroCard';
@@ -7,22 +8,39 @@ import LibroDetalle from './components/LibroDetalle';
 import Login from './components/Login';
 import Registro from './components/Registro';
 import VistaUsuarios from './components/VistaUsuarios';
-
-import { libros } from './data/libros';
-
 import Checkout from './components/Checkout';
+
+import { obtenerLibros } from './services/libroService';
 
 import './App.css';
 
 function Inicio() {
 
-  const publicaciones =
-    JSON.parse(localStorage.getItem('publicaciones')) || [];
+  const [todosLosLibros, setTodosLosLibros] = useState([]);
 
-  const todosLosLibros = [
-    ...publicaciones,
-    ...libros
-  ];
+  useEffect(() => {
+
+    async function cargarLibros() {
+
+      try {
+
+        const data = await obtenerLibros();
+
+        setTodosLosLibros(data);
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert("No se pudieron cargar los libros.");
+
+      }
+
+    }
+
+    cargarLibros();
+
+  }, []);
 
   return (
     <>
@@ -77,21 +95,21 @@ function App() {
       <main style={{ padding: '20px' }}>
         <Routes>
 
-        <Route path="/" element={<Inicio />} />
+          <Route path="/" element={<Inicio />} />
 
-        <Route path="/libro/:id" element={<LibroDetalle />} />
+          <Route path="/libro/:id" element={<LibroDetalle />} />
 
-        <Route path="/comprar/:id" element={<Checkout />} />
+          <Route path="/comprar/:id" element={<Checkout />} />
 
-        <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
 
-        <Route path="/registro" element={<Registro />} />
+          <Route path="/registro" element={<Registro />} />
 
-        <Route path="/admin" element={<VistaUsuarios />} />
+          <Route path="/admin" element={<VistaUsuarios />} />
 
-        <Route path="/publicar" element={<PublicarLibro />} />
+          <Route path="/publicar" element={<PublicarLibro />} />
 
-      </Routes>
+        </Routes>
       </main>
 
     </BrowserRouter>

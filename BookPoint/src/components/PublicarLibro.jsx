@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../AuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
+import { publicarLibro as publicarLibroService } from "../services/libroService";
 
 function PublicarLibro() {
 
@@ -12,44 +13,77 @@ function PublicarLibro() {
     const [autor, setAutor] = useState("");
     const [precio, setPrecio] = useState("");
     const [descripcion, setDescripcion] = useState("");
-    const [imagen, setImagen] = useState("");
 
-    function publicarLibro() {
+    const [imagen, setImagen] = useState("");
+    const [archivoImagen, setArchivoImagen] = useState(null);
+
+    async function subirImagenCloudinary() {
+
+        if (!archivoImagen) return "";
+
+        const formData = new FormData();
+
+        formData.append("file", archivoImagen);
+        formData.append("upload_preset", "bookpoint");
+
+        const respuesta = await fetch(
+            "https://api.cloudinary.com/v1_1/heok783c/image/upload",
+            {
+                method: "POST",
+                body: formData,
+            }
+        );
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+        console.error(datos);
+        throw new Error(datos.error?.message || "Error al subir la imagen a Cloudinary.");
+        }
+
+        return datos.secure_url;
+    }
+
+    async function publicarLibro() {
 
         if (
             !titulo ||
             !autor ||
             !precio ||
-            !descripcion
+            !descripcion ||
+            !archivoImagen
         ) {
             alert("Completa todos los campos");
             return;
         }
 
-        const publicaciones =
-            JSON.parse(localStorage.getItem("publicaciones")) || [];
+        try {
 
-        const nuevoLibro = {
-            id: Date.now(),
-            titulo,
-            autor,
-            precio: `S/ ${precio}`,
-            descripcion,
-            vendedor: usuarioActual.nombre,
-            publicacion: new Date().toLocaleDateString(),
-            imagen: imagen || "https://via.placeholder.com/300x450"
-        };
+            const urlImagen = await subirImagenCloudinary();
 
-        publicaciones.push(nuevoLibro);
+            await publicarLibroService({
 
-        localStorage.setItem(
-            "publicaciones",
-            JSON.stringify(publicaciones)
-        );
+                titulo,
+                autor,
+                precio: `S/ ${precio}`,
+                descripcion,
+                imagen: urlImagen,
+                usuario_id: usuarioActual.id
 
-        alert("Libro publicado correctamente");
+            });
 
-        navigate("/");
+            alert("Libro publicado correctamente");
+
+            navigate("/");
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(error.message);
+
+        }
+
     }
 
     if (!usuarioActual) {
@@ -91,13 +125,10 @@ function PublicarLibro() {
 
                     if (!archivo) return;
 
-                    const lector = new FileReader();
+                    setArchivoImagen(archivo);
 
-                    lector.onloadend = () => {
-                        setImagen(lector.result);
-                    };
+                    setImagen(URL.createObjectURL(archivo));
 
-                    lector.readAsDataURL(archivo);
                 }}
             />
 
@@ -106,9 +137,11 @@ function PublicarLibro() {
                 placeholder="Descripción del libro"
                 value={descripcion}
                 onChange={(e) => {
+
                     if (e.target.value.length <= 500) {
                         setDescripcion(e.target.value);
                     }
+
                 }}
             />
 

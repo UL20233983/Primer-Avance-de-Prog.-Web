@@ -1,25 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { libros } from '../data/libros';
-
+import { obtenerLibro } from '../services/libroService';
 
 function LibroDetalle() {
-
   const navigate = useNavigate();
 
   const { id } = useParams();
 
-  const publicaciones =
-    JSON.parse(localStorage.getItem('publicaciones')) || [];
+  const [libro, setLibro] = useState(null);
 
-  const todosLosLibros = [
-    ...publicaciones,
-    ...libros
-  ];
+  const [cargando, setCargando] = useState(true);
 
-  const libro = todosLosLibros.find(
-    (item) => item.id.toString() === id.toString()
-  );
+  useEffect(() => {
+    async function cargarLibro() {
+      try {
+        const data = await obtenerLibro(id);
+        setLibro(data);
+      } catch (error) {
+        console.error(error);
+        setLibro(null);
+      } finally {
+        setCargando(false);
+      }
+    }
+
+    cargarLibro();
+  }, [id]);
+
+  if (cargando) {
+    return (
+      <h2
+        style={{
+          textAlign: 'center',
+          marginTop: '50px'
+        }}
+      >
+        Cargando...
+      </h2>
+    );
+  }
 
   if (!libro) {
     return (
@@ -33,6 +52,11 @@ function LibroDetalle() {
       </h2>
     );
   }
+
+  const imagen =
+    libro.imagen && libro.imagen.trim() !== ""
+      ? libro.imagen
+      : "URL_DE_TU_IMAGEN_EN_CLOUDINARY";
 
   return (
     <div className="detalle-contenedor">
@@ -48,7 +72,7 @@ function LibroDetalle() {
 
         <div className="detalle-col-izq">
           <img
-            src={libro.imagen}
+            src={imagen}
             alt={libro.titulo}
           />
         </div>
@@ -82,11 +106,11 @@ function LibroDetalle() {
 
           </div>
 
-          <button 
-            className="boton-contactar" 
+          <button
+            className="boton-contactar"
             onClick={() => navigate(`/comprar/${libro.id}`)}
           >
-          Comprar libro
+            Comprar libro
           </button>
 
         </div>

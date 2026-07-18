@@ -1,117 +1,136 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState } from "react";
+
+import {
+    login as loginService,
+    registrar as registrarService
+} from "./services/usuarioService";
 
 export const AuthContext = createContext();
 
-function AuthProvider(props) {
+function AuthProvider({ children }) {
 
-  const [usuarioActual, setUsuarioActual] = useState(
-    JSON.parse(localStorage.getItem('usuarioActual')) || null
-  );
+    const [usuarioActual, setUsuarioActual] = useState(
 
-  function registrar(nombre, correo, password, confirmar) {
+        JSON.parse(localStorage.getItem("usuarioActual")) || null
 
-    const patron = /^[0-9]{8}@aloe\.ulima\.edu\.pe$/;
-
-    if (!patron.test(correo)) {
-      return "Solo se permiten correos ULima";
-    }
-
-    if (password !== confirmar) {
-      return "Las contraseñas no coinciden";
-    }
-
-    let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-
-    const existe = usuarios.find(
-      (u) => u.correo === correo
     );
 
-    if (existe) {
-      return "El usuario ya existe";
+    async function registrar(nombre, correo, password, confirmar) {
+
+        if (password !== confirmar) {
+            return "Las contraseñas no coinciden";
+        }
+
+        try {
+
+            const respuesta = await registrarService(
+
+                nombre,
+                correo,
+                password
+
+            );
+
+            return respuesta.mensaje;
+
+        } catch (error) {
+
+            return error.message;
+
+        }
+
     }
 
-    usuarios.push({
-      nombre: nombre,
-      correo: correo,
-      password: password
-    });
+    async function login(correo, password) {
 
-    localStorage.setItem(
-      'usuarios',
-      JSON.stringify(usuarios)
-    );
+        // Mantengo el administrador local para no depender de la BD
+        if (correo === "admin" && password === "admin123") {
 
-    return "Usuario registrado";
-  }
+            const admin = {
 
-  function login(correo, password) {
+                id: 0,
+                nombre: "Administrador",
+                correo: "admin"
 
-    if (
-      correo === "admin" &&
-      password === "admin123"
-    ) {
+            };
 
-      const admin = {
-        nombre: "Administrador",
-        correo: "admin"
-      };
+            setUsuarioActual(admin);
 
-      setUsuarioActual(admin);
+            localStorage.setItem(
 
-      localStorage.setItem(
-        'usuarioActual',
-        JSON.stringify(admin)
-      );
+                "usuarioActual",
 
-      return true;
+                JSON.stringify(admin)
+
+            );
+
+            return true;
+
+        }
+
+        try {
+
+            const respuesta = await loginService(
+
+                correo,
+                password
+
+            );
+
+            setUsuarioActual(respuesta.usuario);
+
+            localStorage.setItem(
+
+                "usuarioActual",
+
+                JSON.stringify(respuesta.usuario)
+
+            );
+
+            return true;
+
+        } catch (error) {
+
+            alert(error.message);
+
+            return false;
+
+        }
+
     }
 
-    let usuarios = JSON.parse(
-      localStorage.getItem('usuarios')
-    ) || [];
+    function logout() {
 
-    const usuario = usuarios.find(
-      (u) =>
-        u.correo === correo &&
-        u.password === password
-    );
+        setUsuarioActual(null);
 
-    if (usuario) {
+        localStorage.removeItem("usuarioActual");
 
-      setUsuarioActual(usuario);
-
-      localStorage.setItem(
-        'usuarioActual',
-        JSON.stringify(usuario)
-      );
-
-      return true;
     }
 
-    return false;
-  }
+    return (
 
-  function logout() {
+        <AuthContext.Provider
 
-    setUsuarioActual(null);
+            value={{
 
-    localStorage.removeItem(
-      'usuarioActual'
+                usuarioActual,
+
+                registrar,
+
+                login,
+
+                logout
+
+            }}
+
+        >
+
+            {children}
+
+        </AuthContext.Provider>
+
     );
-  }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        usuarioActual,
-        registrar,
-        login,
-        logout
-      }}
-    >
-      {props.children}
-    </AuthContext.Provider>
-  );
 }
 
 export default AuthProvider;
